@@ -1,0 +1,430 @@
+version: '3.4'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.0
+    container_name: zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    ports:
+     - "2181:2181"
+
+  broker:
+    image: confluentinc/cp-kafka:7.2.0
+    container_name: broker
+    ports:
+      - "9092:9092"
+    expose:
+     - "29092"
+    depends_on:
+      - zookeeper
+    env_file: ./generic-drone/modules/broker/config/.env
+
+  atm:
+    build: ./generic-drone/modules/atm
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: atm
+    environment:
+      - MODULE_NAME=atm
+    volumes:
+      - ./generic-drone/modules/atm/storage:/storage
+    ports:
+      - "6064:6064"
+
+  fps:
+    build: ./generic-drone/modules/fps
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: fps
+    environment:
+      - MODULE_NAME=fps
+    ports:
+      - "6065:6065"
+
+  monitor:
+    build: ./generic-drone/modules/monitor
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: monitor
+    environment:
+      - MODULE_NAME=monitor
+    volumes:
+      - ./generic-drone/shared:/shared
+
+  communication:
+    build: ./generic-drone/modules/communication
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: communication
+    environment:
+      - MODULE_NAME=communication
+      - MODULE_PORT=6066
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6066:6066
+
+  chipher:
+    build: ./generic-drone/modules/chipher
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: chipher
+    environment:
+      - MODULE_NAME=chipher
+      - MODULE_PORT=6067
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6067:6067
+
+  data-analyze:
+    build: ./generic-drone/modules/data-analyze
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: data-analyze
+    environment:
+      - MODULE_NAME=data-analyze
+      - MODULE_PORT=6068
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6068:6068
+
+  autopilot:
+    build: ./generic-drone/modules/autopilot
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: autopilot
+    environment:
+      - MODULE_NAME=autopilot
+      - MODULE_PORT=6069
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6069:6069
+
+  manager:
+    build: ./generic-drone/modules/manager
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: manager
+    environment:
+      - MODULE_NAME=manager
+      - MODULE_PORT=6070
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6070:6070
+
+  send-atm:
+    build: ./generic-drone/modules/send-atm
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: send-atm
+    environment:
+      - MODULE_NAME=send-atm
+      - MODULE_PORT=6071
+      - ATM_URL=http://arm:6064
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6071:6071
+
+  ins:
+    build: ./generic-drone/modules/ins
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: ins
+    environment:
+      - MODULE_NAME=ins
+      - MODULE_PORT=6072
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6072:6072
+
+  gnss:
+    build: ./generic-drone/modules/gnss
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: gnss
+    environment:
+      - MODULE_NAME=gnss
+      - MODULE_PORT=6073
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6073:6073
+
+  nav:
+    build: ./generic-drone/modules/nav
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: nav
+    environment:
+      - MODULE_NAME=nav
+      - MODULE_PORT=6074
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6074:6074
+
+  def-storage:
+    build: ./generic-drone/modules/def-storage
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: def-storage
+    environment:
+      - MODULE_NAME=def-storage
+      - MODULE_PORT=6075
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6075:6075
+
+  data-gruber:
+    build: ./generic-drone/modules/data-gruber
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: data-gruber
+    environment:
+      - MODULE_NAME=data-gruber
+      - MODULE_PORT=6076
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6076:6076
+
+  battery-critical:
+    build: ./generic-drone/modules/battery-critical
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: battery-critical
+    environment:
+      - MODULE_NAME=battery-critical
+      - MODULE_PORT=6077
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6077:6077
+
+  battery:
+    build: ./generic-drone/modules/battery
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: battery
+    environment:
+      - MODULE_NAME=battery
+      - MODULE_PORT=6078
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6078:6078
+
+  emergency:
+    build: ./generic-drone/modules/emergency
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: emergency
+    environment:
+      - MODULE_NAME=emergency
+      - MODULE_PORT=6079
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6079:6079
+
+  emergency-servos:
+    build: ./generic-drone/modules/emergency-servos
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: emergency-servos
+    environment:
+      - MODULE_NAME=emergency-servos
+      - MODULE_PORT=6080
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6080:6080
+
+  health-check:
+    build: ./generic-drone/modules/health-check
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: health-check
+    environment:
+      - MODULE_NAME=health-check
+      - MODULE_PORT=6081
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6081:6081
+
+  servos:
+    build: ./generic-drone/modules/servos
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: servos
+    environment:
+      - MODULE_NAME=servos
+      - MODULE_PORT=6082
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6082:6082
+
+  drone-data:
+    build: ./generic-drone/modules/drone-data
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: drone-data
+    environment:
+      - MODULE_NAME=drone-data
+      - MODULE_PORT=6083
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6083:6083
+
+  processing:
+    build: ./generic-drone/modules/processing
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: processing
+    environment:
+      - MODULE_NAME=processing
+      - MODULE_PORT=6084
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6084:6084
+
+  storage:
+    build: ./generic-drone/modules/storage
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 20
+        venv/bin/python start.py /shared/config.ini
+    container_name: storage
+    environment:
+      - MODULE_NAME=storage
+      - MODULE_PORT=6085
+    volumes:
+      - ./generic-drone/shared:/shared
+    ports:
+      - 6085:6085
